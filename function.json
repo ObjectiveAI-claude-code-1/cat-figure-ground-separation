@@ -1,0 +1,178 @@
+{
+  "type": "scalar.function",
+  "input_schema": {
+    "type": "object",
+    "description": "Input for evaluating the visual separation of a cat in a photograph. The function assesses how distinctly and immediately the cat stands apart as the visual subject, evaluating form legibility against the background, tonal and textural contrast with the environment, and focal dominance over competing visual elements in the frame.",
+    "properties": {
+      "photograph": {
+        "type": "image",
+        "description": "A photograph containing a cat. The image may come from any source and context — a professional studio portrait, a casual phone snapshot, a street photograph, or a wildlife capture. It may contain one cat or multiple cats. The photograph may be high resolution or low, carefully composed or hastily taken. The function assumes a cat is present and evaluates the perceptual experience of encountering it within the frame: whether the cat's form is immediately legible, whether it contrasts with its surroundings, and whether it commands the viewer's attention as the singular focal point."
+      }
+    },
+    "required": [
+      "photograph"
+    ]
+  },
+  "tasks": [
+    {
+      "type": "vector.completion",
+      "skip": null,
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "image_url",
+              "image_url": {
+                "$jmespath": "input.photograph.image_url"
+              }
+            },
+            {
+              "type": "text",
+              "text": "Can you immediately make out the shape of the cat in this photograph, or does it blend into its surroundings?"
+            }
+          ]
+        }
+      ],
+      "responses": [
+        [
+          {
+            "type": "text",
+            "text": "The cat's shape is completely clear — its silhouette and edges are immediately legible against the background. There is no ambiguity about where the cat ends and the surroundings begin."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "The cat's form is partially legible — I can identify it, but some edges dissolve into the background where colors or textures are too similar, requiring a moment of effort to trace the full outline."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "The cat's form is very hard to make out — it blends into its surroundings so thoroughly that the boundary between cat and background is largely lost. You have to study the image to find where the cat is."
+          }
+        ]
+      ],
+      "output": {
+        "$starlark": "output[\"scores\"][0] * 1.0 + output[\"scores\"][1] * 0.5"
+      }
+    },
+    {
+      "type": "vector.completion",
+      "skip": null,
+      "messages": [
+        {
+          "role": "developer",
+          "content": [
+            {
+              "type": "text",
+              "text": "You are a photography critic assessing the visual relationship between a subject and its environment. Focus specifically on differences in color, brightness, and texture."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "How strong is the visual contrast between the cat and its environment in this photograph?"
+            },
+            {
+              "type": "image_url",
+              "image_url": {
+                "$jmespath": "input.photograph.image_url"
+              }
+            }
+          ]
+        }
+      ],
+      "responses": [
+        [
+          {
+            "type": "text",
+            "text": "The contrast is striking. The cat differs dramatically from its surroundings in color, brightness, or texture — it practically leaps off the background with commanding visual force."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "The contrast is moderate. The cat is distinguishable from its environment, but the differences in color, brightness, and texture are not especially dramatic."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "The contrast is minimal. The cat and its environment share very similar tones, brightness levels, and surface qualities, creating a flat visual field with little separation."
+          }
+        ]
+      ],
+      "output": {
+        "$starlark": "output[\"scores\"][0] * 1.0 + output[\"scores\"][1] * 0.5"
+      }
+    },
+    {
+      "type": "vector.completion",
+      "skip": null,
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "Take a look at this photograph."
+            },
+            {
+              "type": "image_url",
+              "image_url": {
+                "$jmespath": "input.photograph.image_url"
+              }
+            }
+          ]
+        },
+        {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "text",
+              "text": "I see the photograph. What would you like to know about it?"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "When you look at the full frame, is the cat the singular thing that commands your eye, or do other elements in the scene compete with it for your attention?"
+            }
+          ]
+        }
+      ],
+      "responses": [
+        [
+          {
+            "type": "text",
+            "text": "The cat completely dominates the frame — my eye goes straight to it and stays there. Nothing else in the photograph has enough visual weight to pull my attention away."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "The cat is a clear subject, but there are other elements in the frame — other figures, colorful objects, or prominent scenery — that partially compete for my attention."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "The cat is not the dominant element — other visual elements in the photograph rival or exceed it in visual weight, pulling my eye away and preventing the cat from commanding the scene."
+          }
+        ]
+      ],
+      "output": {
+        "$starlark": "output[\"scores\"][0] * 1.0 + output[\"scores\"][1] * 0.5"
+      }
+    }
+  ],
+  "description": "Scores how distinctly a cat stands apart in a photograph by evaluating three qualities: form legibility against the background, tonal and textural contrast with the environment, and focal dominance over competing visual elements. High scores mean the cat pops as the undeniable subject; low scores mean it blends in or is visually overshadowed."
+}
